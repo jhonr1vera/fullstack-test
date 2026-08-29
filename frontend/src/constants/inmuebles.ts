@@ -4,6 +4,8 @@ export const INMUEBLES_TEXTS = {
     logoutButton: 'Cerrar Sesión',
     loadingSession: 'Cargando sesión...',
     welcome: 'Hola,',
+    navInmuebles: 'Inmuebles',
+    navAgents: 'Agentes',
   },
   list: {
     empty: 'No se encontraron inmuebles',
