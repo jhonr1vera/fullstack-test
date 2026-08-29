@@ -3,16 +3,23 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter.js';
 
+import cookieParser from 'cookie-parser';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS Enable for frontend requests
-  app.enableCors();
+  // Habilitar cookie parser para leer cookies HTTPOnly para validación
+  app.use(cookieParser());
+
+// CORS para validar request
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  });
 
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global validation pipes with whitelist enabled
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
