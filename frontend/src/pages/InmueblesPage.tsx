@@ -5,6 +5,7 @@ import { api } from '../services/api.js';
 import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { EstadosInmuebleEnum } from '../types/inmuebles.js';
 import type { Inmueble, TipoInmueble, PaginacionMeta } from '../types/inmuebles.js';
+import AddInmuebleModal from '../components/AddInmuebleModal.js';
 
 export default function InmueblesPage() {
   const { user, logout } = useAuth();
@@ -29,6 +30,7 @@ export default function InmueblesPage() {
   const [page, setPage] = useState(1);
   const [orderBy, setOrderBy] = useState<'precio' | 'createdAt'>('createdAt');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const loadPropertyTypes = async () => {
@@ -115,9 +117,9 @@ export default function InmueblesPage() {
   };
 
   const formatPrice = (value: number): string => {
-    return new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
+      currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
@@ -137,6 +139,12 @@ export default function InmueblesPage() {
             <span className="text-slate-400 text-sm hidden sm:inline">
               {INMUEBLES_TEXTS.header.welcome} <strong className="text-slate-200">{user?.nombre}</strong>
             </span>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-indigo-600/10"
+            >
+              <span>{INMUEBLES_TEXTS.modal.title}</span>
+            </button>
             <button
               onClick={logout}
               className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold border border-slate-850 transition-all cursor-pointer"
@@ -448,6 +456,13 @@ export default function InmueblesPage() {
           </div>
         </div>
       </main>
+
+      <AddInmuebleModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchProperties}
+        propertyTypes={propertyTypes}
+      />
     </div>
   );
 }
