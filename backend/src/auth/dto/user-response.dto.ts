@@ -5,14 +5,14 @@ export class UserResponseDto {
   nombre: string;
   email: string;
   activo: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 
   @Exclude()
   password?: string;
 
   @Exclude()
-  deletedAt?: string | null;
+  deletedAt?: Date | string | null;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

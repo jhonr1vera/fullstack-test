@@ -15,9 +15,9 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     const { nombre, email, password } = registerDto;
 
-    const emailExists = await this.prisma.client.orm.public.User
-      .where((u) => u.email.eq(email))
-      .first();
+    const emailExists = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
     if (emailExists) {
       throw new ConflictException({
@@ -29,11 +29,13 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prisma.client.orm.public.User.create({
-      nombre,
-      email,
-      password: hashedPassword,
-      activo: true,
+    const user = await this.prisma.user.create({
+      data: {
+        nombre,
+        email,
+        password: hashedPassword,
+        activo: true,
+      },
     });
 
     const { password: _, ...userWithoutPassword } = user;
@@ -43,9 +45,9 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    const user = await this.prisma.client.orm.public.User
-      .where((u) => u.email.eq(email))
-      .first();
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
     if (!user || user.deletedAt !== null) {
       throw new UnauthorizedException({
