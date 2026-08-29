@@ -49,7 +49,7 @@ export class AuthService {
       where: { email },
     });
 
-    if (!user || user.deletedAt !== null) {
+    if (!user) {
       throw new UnauthorizedException({
         statusCode: 401,
         code: 'INVALID_CREDENTIALS',
@@ -57,11 +57,11 @@ export class AuthService {
       });
     }
 
-    if (!user.activo) {
+    if (user.deletedAt !== null || !user.activo) {
       throw new UnauthorizedException({
         statusCode: 401,
         code: 'INACTIVE_USER',
-        message: 'Su cuenta ya no existe',
+        message: 'Su cuenta ha sido eliminada o desactivada',
       });
     }
 
@@ -72,6 +72,7 @@ export class AuthService {
         code: 'INVALID_CREDENTIALS',
         message: 'Credenciales inválidas',
       });
+
     }
 
     const payload = { sub: user.id, email: user.email };

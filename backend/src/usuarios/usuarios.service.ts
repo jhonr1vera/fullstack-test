@@ -114,6 +114,16 @@ export class UsuariosService {
       throw new NotFoundException('Usuario no encontrado o ya eliminado');
     }
 
+    // Hacemos softdelete de los inmuebles disponibles y reservados del usuario
+    await this.prisma.inmueble.updateMany({
+      where: {
+        vendedorId: id,
+        deletedAt: null,
+        estado: { in: ['DISPONIBLE', 'RESERVADO'] },
+      },
+      data: { deletedAt: new Date() },
+    });
+
     await this.prisma.user.update({
       where: { id },
       data: {
