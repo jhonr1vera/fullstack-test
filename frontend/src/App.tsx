@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute.js';
 import LoginPage from './pages/LoginPage.js';
 import AddUser from './pages/AddUser.js';
 import InmuebleList from './pages/InmuebleList.js';
+import UserList from './pages/UserList.js';
 
 function App() {
   return (
@@ -17,6 +18,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <InmuebleList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usuarios"
+            element={
+              <ProtectedRoute>
+                <UserList />
               </ProtectedRoute>
             }
           />
