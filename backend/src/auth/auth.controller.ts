@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto.js';
 import { UserResponseDto } from './dto/user-response.dto.js';
 import { Public } from '../shared/decorators/public.decorator.js';
 import { CurrentUser } from '../shared/decorators/current-user.decorator.js';
+import type * as client from '@prisma/client';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
@@ -25,7 +26,7 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(@CurrentUser() user: any) {
+  async me(@CurrentUser() user: client.User) {
     return new UserResponseDto(user);
   }
 }
