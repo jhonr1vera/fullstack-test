@@ -1,14 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS for frontend integration
+  // CORS Enable for frontend requests
   app.enableCors();
 
-  // Use global validation pipes with whitelist enabled
+  // Global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global validation pipes with whitelist enabled
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

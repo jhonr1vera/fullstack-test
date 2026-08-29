@@ -55,6 +55,11 @@ export class UsuariosService {
       throw new ForbiddenException('Solo puedes editar tu propia cuenta');
     }
 
+    const hasUpdates = updateDto && Object.values(updateDto).some(val => val !== undefined);
+    if (!hasUpdates) {
+      throw new BadRequestException('No se envio ningun dato para actualizar');
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -86,10 +91,6 @@ export class UsuariosService {
 
     if (updateDto.password) {
       dataToUpdate.password = await bcrypt.hash(updateDto.password, 10);
-    }
-
-    if (Object.keys(dataToUpdate).length === 0) {
-      throw new BadRequestException('No se envio ningun dato para actualizar');
     }
 
     await this.prisma.user.update({

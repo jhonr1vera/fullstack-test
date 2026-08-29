@@ -154,6 +154,12 @@ export class InmueblesService {
   }
 
   async update(id: string, updateDto: UpdateInmuebleDto, loggedInUserId: string) {
+
+    const hasUpdates = updateDto && Object.values(updateDto).some(val => val !== undefined);
+    if (!hasUpdates) {
+      throw new BadRequestException('No se proporcionaron datos para actualizar');
+    }
+
     const item = await this.prisma.inmueble.findFirst({
       where: {
         id,
