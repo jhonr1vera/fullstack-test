@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service.js';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
 import { QueryUsuarioDto } from './dto/query-usuario.dto.js';
@@ -86,6 +86,10 @@ export class UsuariosService {
 
     if (updateDto.password) {
       dataToUpdate.password = await bcrypt.hash(updateDto.password, 10);
+    }
+
+    if (Object.keys(dataToUpdate).length === 0) {
+      throw new BadRequestException('No se envio ningun dato para actualizar');
     }
 
     await this.prisma.user.update({
