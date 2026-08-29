@@ -34,7 +34,7 @@ model TipoInmueble {
 model Inmueble {
   id              String       @id @default(uuid())
   direccion       String
-  precio          Decimal
+  precio          Int
   habitaciones    Int
   metrosCuadrados Int
   tipoInmueble    TipoInmueble @relation(fields: [tipoInmuebleId], references: [id])
