@@ -6,6 +6,7 @@ export class CreateInmuebleDto {
   direccion: string;
 
   @IsNumber({}, { message: 'El precio debe ser un número válido' })
+  @IsInt({ message: 'El precio debe ser un número entero' })
   @Min(1, { message: 'El precio debe ser mayor que cero' })
   precio: number;
 
