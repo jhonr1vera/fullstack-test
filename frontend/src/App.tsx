@@ -20,7 +20,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* Default fallback redirects to /inmuebles */}
+          {/* Por defecto redirige a /inmuebles */}
           <Route path="*" element={<Navigate to="/inmuebles" replace />} />
         </Routes>
       </BrowserRouter>
