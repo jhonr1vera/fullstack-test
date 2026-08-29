@@ -5,6 +5,7 @@ import { useAuth, type User } from '../context/AuthContext.js';
 import { api } from '../services/api.js';
 import { AUTH_TEXTS } from '../constants/auth.js';
 import { VALIDATION_TEXTS } from '../constants/validators.js';
+import { handleEnterTransition } from '../shared/utils/keyboard.js';
 
 interface ValidationErrors {
   email?: string;
@@ -24,13 +25,13 @@ export default function LoginPage() {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // Vlidamos correo
+  // Validamos correo
   const isValidEmail = (val: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(val);
   };
 
-  // Valisdamos del lado del client
+  // Validamos del lado del cliente
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
@@ -112,9 +113,11 @@ export default function LoginPage() {
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
               <input
+                id="email-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => handleEnterTransition(e, 'password-input')}
                 placeholder={AUTH_TEXTS.login.emailPlaceholder}
                 disabled={isLoading}
                 className={`w-full bg-slate-950/60 border ${
@@ -138,6 +141,7 @@ export default function LoginPage() {
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
               <input
+                id="password-input"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
