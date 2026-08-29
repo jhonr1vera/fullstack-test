@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Users, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../services/api.js';
 import { USUARIOS_TEXTS } from '../constants/usuarios.js';
 import UserItem, { type UserListData } from '../components/UserItem.js';
