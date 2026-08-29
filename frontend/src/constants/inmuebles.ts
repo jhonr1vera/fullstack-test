@@ -1,0 +1,53 @@
+export const INMUEBLES_TEXTS = {
+  header: {
+    title: 'Gestión de Inmuebles',
+    logoutButton: 'Cerrar Sesión',
+    loadingSession: 'Cargando sesión...',
+    welcome: 'Hola,',
+  },
+  list: {
+    empty: 'No se encontraron inmuebles',
+    loading: 'Cargando inmuebles...',
+    rooms: 'habitaciones',
+    area: 'm²',
+    agentTitle: 'Agente Inmobiliario',
+    ownBadge: 'Mi Inmueble',
+  },
+  filters: {
+    title: 'Filtros',
+    searchLabel: 'Dirección',
+    searchPlaceholder: 'Buscar por dirección...',
+    minPrice: 'Mínimo',
+    maxPrice: 'Máximo',
+    type: 'Tipo de Inmueble',
+    status: 'Estado',
+    onlyMine: 'Solo mis inmuebles',
+    all: 'Todos',
+    sortBy: 'Ordenar por',
+    sortOrder: 'Dirección de orden',
+    priceOption: 'Precio',
+    dateOption: 'Fecha de Creación',
+    ascOption: 'Ascendente',
+    descOption: 'Descendente',
+  },
+  status: {
+    disponible: 'Disponible',
+    reservado: 'Reservado',
+    vendido: 'Vendido',
+  },
+  actions: {
+    reserve: 'Reservar',
+    release: 'Liberar',
+    sell: 'Marcar Vendido',
+    deleteTooltip: 'Eliminar Inmueble',
+  },
+  pagination: {
+    pageLabel: 'Página',
+    ofLabel: 'de',
+  },
+  alerts: {
+    deleteConfirm: '¿Está seguro de que desea eliminar este inmueble?',
+    deleteError: 'No se pudo eliminar el inmueble',
+    statusError: 'Transición de estado inválida',
+  },
+} as const;
