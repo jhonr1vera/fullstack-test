@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { LogOut, Home, Users, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '../context/AuthContext.js';
+import { Home, Users, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../services/api.js';
 import { USUARIOS_TEXTS } from '../constants/usuarios.js';
 import UserItem, { type UserListData } from '../components/UserItem.js';
 import PageSizeSelector from '../components/PageSizeSelector.js';
+import AppHeader from '../components/AppHeader.js';
 import type { PaginacionMeta } from '../types/inmuebles.js';
 
 export default function UserList() {
-  const { user, logout } = useAuth();
 
   // Estados de paginación
   const [users, setUsers] = useState<UserListData[]>([]);
@@ -48,47 +46,7 @@ export default function UserList() {
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-12">
       
-      {/* Header unificado con navegación */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Users className="w-8 h-8 text-indigo-500" />
-              <h1 className="text-xl font-black tracking-tight text-white">
-                {USUARIOS_TEXTS.header.title}
-              </h1>
-            </div>
-            {/* Navegación entre vistas */}
-            <nav className="flex items-center gap-4 border-l border-slate-850 pl-6 text-sm font-semibold">
-              <Link
-                to="/inmuebles"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                {USUARIOS_TEXTS.header.navInmuebles}
-              </Link>
-              <Link
-                to="/usuarios"
-                className="text-indigo-400 cursor-default"
-              >
-                {USUARIOS_TEXTS.header.navAgents}
-              </Link>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400 text-sm hidden md:inline">
-              {USUARIOS_TEXTS.header.welcome} <strong className="text-slate-200">{user?.nombre}</strong>
-            </span>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold border border-slate-850 transition-all cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{USUARIOS_TEXTS.header.logoutButton}</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader activeView="usuarios" maxWidth="max-w-5xl" />
 
       {/* Listado principal */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
