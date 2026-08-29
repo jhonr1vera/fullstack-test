@@ -13,7 +13,7 @@ interface ValidationErrors {
   password?: string;
 }
 
-export default function RegisterPage() {
+export default function AddUser() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -23,17 +23,14 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estados de errores
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // Validamos formato de correo electrónico
   const isValidEmail = (val: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(val);
   };
 
-  // Validamos campos del formulario en el cliente
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
@@ -75,7 +72,6 @@ export default function RegisterPage() {
         password,
       });
 
-      // Iniciamos sesión automáticamente tras un registro exitoso
       await api.post('/auth/login', {
         email,
         password,
@@ -111,7 +107,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Alerta de error del servidor */}
         {serverError && (
           <div className="mb-6 flex items-start gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm">
             <AlertCircle className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
@@ -120,7 +115,6 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Campo: Nombre Completo */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-300 block">
               {AUTH_TEXTS.register.nameLabel}
@@ -148,7 +142,6 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Campo: Correo Electrónico */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-300 block">
               {AUTH_TEXTS.register.emailLabel}
@@ -176,7 +169,6 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Campo: Contraseña */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-300 block">
               {AUTH_TEXTS.register.passwordLabel}
@@ -211,7 +203,6 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Botón de envío */}
           <button
             type="submit"
             disabled={isLoading}

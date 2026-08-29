@@ -4,7 +4,7 @@ import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { EstadosInmuebleEnum } from '../types/inmuebles.js';
 import type { Inmueble } from '../types/inmuebles.js';
 
-interface InmuebleCardProps {
+interface InmuebleItemProps {
   property: Inmueble;
   onDetailClick: (property: Inmueble) => void;
   onEditClick: (property: Inmueble) => void;
@@ -13,19 +13,17 @@ interface InmuebleCardProps {
   isUpdating: boolean;
 }
 
-// Tarjeta de detalles de inmueble
-export default function InmuebleCard({
+export default function InmuebleItem({
   property,
   onDetailClick,
   onEditClick,
   onStatusChange,
   onDelete,
   isUpdating,
-}: InmuebleCardProps) {
+}: InmuebleItemProps) {
   const { user } = useAuth();
   const isOwner = user?.id === property.vendedorId;
 
-  // Formato de moneda
   const formatPrice = (value: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -35,7 +33,6 @@ export default function InmuebleCard({
     }).format(value);
   };
 
-  // Clases dinámicas de color para estado
   let statusColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
   if (property.estado === EstadosInmuebleEnum.RESERVADO) {
     statusColor = 'bg-amber-500/10 text-amber-400 border-amber-500/25';
@@ -69,7 +66,7 @@ export default function InmuebleCard({
 
         <h3
           onClick={() => onDetailClick(property)}
-          className="font-bold text-lg text-slate-100 hover:text-indigo-405 line-clamp-1 cursor-pointer transition-colors"
+          className="font-bold text-lg text-slate-100 hover:text-indigo-400 line-clamp-1 cursor-pointer transition-colors"
         >
           {property.direccion}
         </h3>
@@ -124,7 +121,7 @@ export default function InmuebleCard({
               <button
                 disabled={isUpdating}
                 onClick={() => onStatusChange(property.id, EstadosInmuebleEnum.VENDIDO)}
-                className="bg-slate-700 hover:bg-slate-650 active:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="bg-slate-700 hover:bg-slate-650 active:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>{INMUEBLES_TEXTS.actions.sell}</span>

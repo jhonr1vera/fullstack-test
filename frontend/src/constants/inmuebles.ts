@@ -66,4 +66,17 @@ export const INMUEBLES_TEXTS = {
     submit: 'Crear Inmueble',
     submitting: 'Creando...',
   },
+  editModal: {
+    title: 'Editar Inmueble',
+    submit: 'Guardar Cambios',
+    submitting: 'Guardando...',
+    success: 'Inmueble actualizado exitosamente',
+    error: 'Ocurrió un error al actualizar el inmueble',
+  },
+  detail: {
+    title: 'Detalle del Inmueble',
+    sellerInfo: 'Información del Agente',
+    dateLabel: 'Publicado el',
+    close: 'Cerrar',
+  },
 } as const;

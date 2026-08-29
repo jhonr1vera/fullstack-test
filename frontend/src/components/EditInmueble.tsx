@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, AlertCircle } from 'lucide-react';
 import { api } from '../services/api.js';
 import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { VALIDATION_TEXTS } from '../constants/validators.js';
 import { handleEnterTransition } from '../shared/utils/keyboard.js';
-import type { TipoInmueble } from '../types/inmuebles.js';
+import type { Inmueble, TipoInmueble } from '../types/inmuebles.js';
 
-interface AddInmuebleModalProps {
+interface EditInmuebleProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   propertyTypes: TipoInmueble[];
+  property: Inmueble | null;
 }
 
 interface ValidationErrors {
@@ -21,13 +22,14 @@ interface ValidationErrors {
   area?: string;
 }
 
-export default function AddInmuebleModal({
+export default function EditInmueble({
   isOpen,
   onClose,
   onSuccess,
   propertyTypes,
-}: AddInmuebleModalProps) {
-  if (!isOpen) return null;
+  property,
+}: EditInmuebleProps) {
+  if (!isOpen || !property) return null;
 
   const [propertyTypeId, setPropertyTypeId] = useState('');
   const [address, setAddress] = useState('');
@@ -39,7 +41,18 @@ export default function AddInmuebleModal({
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Validación de campos antes del envío
+  useEffect(() => {
+    if (property) {
+      setPropertyTypeId(property.tipoInmuebleId);
+      setAddress(property.direccion);
+      setPrice(property.precio);
+      setRooms(property.habitaciones);
+      setArea(property.metrosCuadrados);
+      setServerError(null);
+      setValidationErrors({});
+    }
+  }, [property]);
+
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
@@ -77,7 +90,7 @@ export default function AddInmuebleModal({
     setIsSubmitting(true);
 
     try {
-      await api.post('/inmuebles', {
+      await api.patch(`/inmuebles/${property.id}`, {
         direccion: address.trim(),
         precio: Number(price),
         habitaciones: Number(rooms),
@@ -85,11 +98,11 @@ export default function AddInmuebleModal({
         tipoInmuebleId: propertyTypeId,
       });
 
-      alert(INMUEBLES_TEXTS.alerts.createSuccess);
+      alert(INMUEBLES_TEXTS.editModal.success);
       onSuccess();
       onClose();
     } catch (err: any) {
-      const message = err?.response?.data?.message || INMUEBLES_TEXTS.alerts.createError;
+      const message = err?.response?.data?.message || INMUEBLES_TEXTS.editModal.error;
       setServerError(Array.isArray(message) ? message.join(', ') : message);
     } finally {
       setIsSubmitting(false);
@@ -100,9 +113,8 @@ export default function AddInmuebleModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Encabezado */}
         <div className="flex justify-between items-center border-b border-slate-850 pb-4">
-          <h2 className="text-xl font-bold text-white">{INMUEBLES_TEXTS.modal.title}</h2>
+          <h2 className="text-xl font-bold text-white">{INMUEBLES_TEXTS.editModal.title}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-850 transition-colors"
@@ -111,7 +123,6 @@ export default function AddInmuebleModal({
           </button>
         </div>
 
-        {/* Alerta de Error del Servidor */}
         {serverError && (
           <div className="flex items-start gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm">
             <AlertCircle className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
@@ -119,14 +130,12 @@ export default function AddInmuebleModal({
           </div>
         )}
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Tipo de Inmueble */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase text-slate-400">{INMUEBLES_TEXTS.modal.typeLabel}</label>
             <select
-              id="modal-type-select"
+              id="edit-type-select"
               value={propertyTypeId}
               onChange={(e) => setPropertyTypeId(e.target.value)}
               className={`w-full bg-slate-950 border ${
@@ -145,15 +154,14 @@ export default function AddInmuebleModal({
             )}
           </div>
 
-          {/* Dirección */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase text-slate-400">{INMUEBLES_TEXTS.modal.addressLabel}</label>
             <input
-              id="modal-address-input"
+              id="edit-address-input"
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              onKeyDown={(e) => handleEnterTransition(e, 'modal-price-input')}
+              onKeyDown={(e) => handleEnterTransition(e, 'edit-price-input')}
               placeholder={INMUEBLES_TEXTS.modal.addressPlaceholder}
               className={`w-full bg-slate-950 border ${
                 validationErrors.address ? 'border-red-500' : 'border-slate-800 focus:border-indigo-500'
@@ -164,15 +172,14 @@ export default function AddInmuebleModal({
             )}
           </div>
 
-          {/* Precio */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase text-slate-400">{INMUEBLES_TEXTS.modal.priceLabel}</label>
             <input
-              id="modal-price-input"
+              id="edit-price-input"
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
-              onKeyDown={(e) => handleEnterTransition(e, 'modal-rooms-input')}
+              onKeyDown={(e) => handleEnterTransition(e, 'edit-rooms-input')}
               placeholder={INMUEBLES_TEXTS.modal.pricePlaceholder}
               className={`w-full bg-slate-950 border ${
                 validationErrors.price ? 'border-red-500' : 'border-slate-800 focus:border-indigo-500'
@@ -183,16 +190,15 @@ export default function AddInmuebleModal({
             )}
           </div>
 
-          {/* Habitaciones y Metros Cuadrados */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase text-slate-400">{INMUEBLES_TEXTS.modal.roomsLabel}</label>
               <input
-                id="modal-rooms-input"
+                id="edit-rooms-input"
                 type="number"
                 value={rooms}
                 onChange={(e) => setRooms(e.target.value === '' ? '' : Number(e.target.value))}
-                onKeyDown={(e) => handleEnterTransition(e, 'modal-area-input')}
+                onKeyDown={(e) => handleEnterTransition(e, 'edit-area-input')}
                 placeholder="2"
                 className={`w-full bg-slate-950 border ${
                   validationErrors.rooms ? 'border-red-500' : 'border-slate-800 focus:border-indigo-500'
@@ -206,7 +212,7 @@ export default function AddInmuebleModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase text-slate-400">{INMUEBLES_TEXTS.modal.areaLabel}</label>
               <input
-                id="modal-area-input"
+                id="edit-area-input"
                 type="number"
                 value={area}
                 onChange={(e) => setArea(e.target.value === '' ? '' : Number(e.target.value))}
@@ -221,13 +227,12 @@ export default function AddInmuebleModal({
             </div>
           </div>
 
-          {/* Botones de Acción */}
           <div className="flex gap-3 justify-end pt-4 border-t border-slate-850">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-300 font-semibold px-4 py-2 rounded-xl text-sm transition-all"
+              className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-350 font-semibold px-4 py-2 rounded-xl text-sm transition-all"
             >
               {INMUEBLES_TEXTS.modal.cancel}
             </button>
@@ -236,7 +241,7 @@ export default function AddInmuebleModal({
               disabled={isSubmitting}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-indigo-600/10 transition-all disabled:opacity-50"
             >
-              {isSubmitting ? INMUEBLES_TEXTS.modal.submitting : INMUEBLES_TEXTS.modal.submit}
+              {isSubmitting ? INMUEBLES_TEXTS.editModal.submitting : INMUEBLES_TEXTS.editModal.submit}
             </button>
           </div>
 

@@ -5,12 +5,12 @@ import { api } from '../services/api.js';
 import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { EstadosInmuebleEnum } from '../types/inmuebles.js';
 import type { Inmueble, TipoInmueble, PaginacionMeta } from '../types/inmuebles.js';
-import AddInmuebleModal from '../components/AddInmuebleModal.js';
-import EditInmuebleModal from '../components/EditInmuebleModal.js';
-import InmuebleDetailModal from '../components/InmuebleDetailModal.js';
-import InmuebleCard from '../components/InmuebleCard.js';
+import AddInmueble from '../components/AddInmueble.js';
+import EditInmueble from '../components/EditInmueble.js';
+import InmuebleDetalle from '../components/InmuebleDetalle.js';
+import InmuebleItem from '../components/InmuebleItem.js';
 
-export default function InmueblesPage() {
+export default function InmuebleList() {
   const { user, logout } = useAuth();
 
   // Estados de datos
@@ -337,7 +337,7 @@ export default function InmueblesPage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {properties.map((property) => (
-                    <InmuebleCard
+                    <InmuebleItem
                       key={property.id}
                       property={property}
                       onDetailClick={(prop) => {
@@ -372,7 +372,7 @@ export default function InmueblesPage() {
                       <button
                         onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
                         disabled={meta.page === meta.totalPages}
-                        className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-350 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
+                        className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-355 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -386,14 +386,14 @@ export default function InmueblesPage() {
       </main>
 
       {/* Modales */}
-      <AddInmuebleModal
+      <AddInmueble
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={fetchProperties}
         propertyTypes={propertyTypes}
       />
 
-      <InmuebleDetailModal
+      <InmuebleDetalle
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
@@ -410,7 +410,7 @@ export default function InmueblesPage() {
         isUpdating={!!isUpdating}
       />
 
-      <EditInmuebleModal
+      <EditInmueble
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
