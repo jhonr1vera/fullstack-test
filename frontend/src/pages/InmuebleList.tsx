@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { LogOut, Search, Filter, Home, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '../context/AuthContext.js';
+import { Search, Filter, Home, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../services/api.js';
 import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { EstadosInmuebleEnum } from '../types/inmuebles.js';
 import type { Inmueble, TipoInmueble, PaginacionMeta } from '../types/inmuebles.js';
+import AppHeader from '../components/AppHeader.js';
 import AddInmueble from '../components/AddInmueble.js';
 import EditInmueble from '../components/EditInmueble.js';
 import InmuebleDetalle from '../components/InmuebleDetalle.js';
@@ -13,7 +12,6 @@ import InmuebleItem from '../components/InmuebleItem.js';
 import PageSizeSelector from '../components/PageSizeSelector.js';
 
 export default function InmuebleList() {
-  const { user, logout } = useAuth();
 
   // Estados de datos
   const [properties, setProperties] = useState<Inmueble[]>([]);
@@ -146,42 +144,17 @@ export default function InmuebleList() {
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-12">
       {/* Encabezado */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Home className="w-8 h-8 text-indigo-500" />
-              <h1 className="text-2xl font-black tracking-tight text-white">
-                {INMUEBLES_TEXTS.header.title}
-              </h1>
-            </div>
-            <nav className="flex items-center gap-4 border-l border-slate-850 pl-6 text-sm font-semibold">
-              <span className="text-indigo-400 cursor-default">{INMUEBLES_TEXTS.header.navInmuebles}</span>
-              <Link to="/usuarios" className="text-slate-400 hover:text-white transition-colors">
-                {INMUEBLES_TEXTS.header.navAgents}
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400 text-sm hidden sm:inline">
-              {INMUEBLES_TEXTS.header.welcome} <strong className="text-slate-200">{user?.nombre}</strong>
-            </span>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-indigo-600/10"
-            >
-              <span>{INMUEBLES_TEXTS.modal.title}</span>
-            </button>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold border border-slate-850 transition-all cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{INMUEBLES_TEXTS.header.logoutButton}</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        activeView="inmuebles"
+        action={
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-indigo-600/10"
+          >
+            <span>{INMUEBLES_TEXTS.modal.title}</span>
+          </button>
+        }
+      />
 
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -253,9 +226,11 @@ export default function InmuebleList() {
                 <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.minPrice}</label>
                 <input
                   type="number"
+                  min="0"
                   value={minPrice}
                   onChange={(e) => {
-                    const val = e.target.value === '' ? '' : Number(e.target.value);
+                    const parsed = Number(e.target.value);
+                    const val = e.target.value === '' ? '' : (parsed < 0 ? 0 : parsed);
                     setMinPrice(val);
                     handleFilterChange();
                   }}
@@ -267,9 +242,11 @@ export default function InmuebleList() {
                 <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.maxPrice}</label>
                 <input
                   type="number"
+                  min="0"
                   value={maxPrice}
                   onChange={(e) => {
-                    const val = e.target.value === '' ? '' : Number(e.target.value);
+                    const parsed = Number(e.target.value);
+                    const val = e.target.value === '' ? '' : (parsed < 0 ? 0 : parsed);
                     setMaxPrice(val);
                     handleFilterChange();
                   }}
@@ -408,6 +385,7 @@ export default function InmuebleList() {
       </main>
 
       {/* Modales */}
+
       <AddInmueble
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
