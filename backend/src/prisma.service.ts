@@ -1,15 +1,13 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { db } from './prisma/db.js';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class PrismaService implements OnModuleInit, OnModuleDestroy {
-  readonly client = db;
-
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
-    // In Prisma Next, connection is lazy, but we can verify it if needed
+    await this.$connect();
   }
 
   async onModuleDestroy() {
-    // Clean up connections if necessary
+    await this.$disconnect();
   }
 }
