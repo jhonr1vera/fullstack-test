@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user || !user.activo || user.deletedAt !== null) {
-      throw new UnauthorizedException('User is inactive or no longer exists');
+      throw new UnauthorizedException('Inicie sesión para continuar');
     }
 
     const { password, ...userWithoutPassword } = user;
