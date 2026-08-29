@@ -17,6 +17,8 @@ model User {
   updatedAt DateTime   @updatedAt
   deletedAt DateTime?
   inmuebles Inmueble[]
+
+  @@map("user")
 }
 
 model TipoInmueble {
@@ -25,6 +27,8 @@ model TipoInmueble {
   nombre    String
   activo    Boolean    @default(true)
   inmuebles Inmueble[]
+
+  @@map("tipoInmueble")
 }
 
 model Inmueble {
@@ -41,4 +45,6 @@ model Inmueble {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   deletedAt       DateTime?
+
+  @@map("inmueble")
 }
