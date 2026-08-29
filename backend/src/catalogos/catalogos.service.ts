@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service.js';
 
 @Injectable()
@@ -20,5 +20,21 @@ export class CatalogosService {
     }
 
     return tiposInmueble;
+  }
+
+  async validarTipoActivo(id: string) {
+    const tipo = await this.prisma.tipoInmueble.findUnique({
+      where: { id },
+    });
+
+    if (!tipo || !tipo.activo) {
+      throw new BadRequestException({
+        statusCode: 400,
+        code: 'INVALID_PROPERTY_TYPE',
+        message: 'El tipo de inmueble especificado no existe o está inactivo',
+      });
+    }
+
+    return tipo;
   }
 }
