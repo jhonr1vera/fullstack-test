@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { LogOut, Search, Filter, Trash2, Home, RefreshCw, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { LogOut, Search, Filter, Home, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { api } from '../services/api.js';
 import { INMUEBLES_TEXTS } from '../constants/inmuebles.js';
 import { EstadosInmuebleEnum } from '../types/inmuebles.js';
 import type { Inmueble, TipoInmueble, PaginacionMeta } from '../types/inmuebles.js';
 import AddInmuebleModal from '../components/AddInmuebleModal.js';
+import EditInmuebleModal from '../components/EditInmuebleModal.js';
+import InmuebleDetailModal from '../components/InmuebleDetailModal.js';
+import InmuebleCard from '../components/InmuebleCard.js';
 
 export default function InmueblesPage() {
   const { user, logout } = useAuth();
@@ -20,8 +23,9 @@ export default function InmueblesPage() {
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // filtros
+  // Filtros y ordenamiento
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [tipoInmuebleId, setTipoInmuebleId] = useState('');
   const [status, setStatus] = useState('');
   const [minPrice, setMinPrice] = useState<number | ''>('');
@@ -30,8 +34,23 @@ export default function InmueblesPage() {
   const [page, setPage] = useState(1);
   const [orderBy, setOrderBy] = useState<'precio' | 'createdAt'>('createdAt');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Control de modales
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Inmueble | null>(null);
+
+  // Debounce para evitar llamadas excesivas en la búsqueda por dirección
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Carga de catálogo de tipos al montar la vista
   useEffect(() => {
     const loadPropertyTypes = async () => {
       try {
@@ -44,7 +63,7 @@ export default function InmueblesPage() {
     loadPropertyTypes();
   }, []);
 
-  // Cargamos inmuebles
+  // Carga principal de inmuebles
   const fetchProperties = async () => {
     setIsLoading(true);
     setError(null);
@@ -54,7 +73,7 @@ export default function InmueblesPage() {
       limit: 6,
     };
 
-    if (search.trim()) queryParams.search = search.trim();
+    if (debouncedSearch.trim()) queryParams.search = debouncedSearch.trim();
     if (tipoInmuebleId) queryParams.tipoInmuebleId = tipoInmuebleId;
     if (status) queryParams.estado = status;
     if (minPrice !== '') queryParams.precioMin = minPrice;
@@ -79,15 +98,16 @@ export default function InmueblesPage() {
     }
   };
 
-  // Disparamos carga al mutar filtros o página
+  // Disparar carga de propiedades
   useEffect(() => {
     fetchProperties();
-  }, [page, search, tipoInmuebleId, status, minPrice, maxPrice, onlyMine, orderBy, order]);
+  }, [page, debouncedSearch, tipoInmuebleId, status, minPrice, maxPrice, onlyMine, orderBy, order]);
 
   const handleFilterChange = () => {
     setPage(1);
   };
 
+  // Borrado lógico del inmueble
   const handleDelete = async (id: string) => {
     if (!window.confirm(INMUEBLES_TEXTS.alerts.deleteConfirm)) {
       return;
@@ -104,11 +124,15 @@ export default function InmueblesPage() {
     }
   };
 
+  // Transición de estados del inmueble
   const handleStatusChange = async (id: string, newStatus: EstadosInmuebleEnum) => {
     setIsUpdating(id);
     try {
       await api.patch(`/inmuebles/${id}/estado`, { estado: newStatus });
       await fetchProperties();
+      if (selectedProperty && selectedProperty.id === id) {
+        setSelectedProperty((prev) => prev ? { ...prev, estado: newStatus } : null);
+      }
     } catch (err: any) {
       alert(err?.response?.data?.message || INMUEBLES_TEXTS.alerts.statusError);
     } finally {
@@ -116,17 +140,9 @@ export default function InmueblesPage() {
     }
   };
 
-  const formatPrice = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-12">
+      {/* Encabezado */}
       <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -156,16 +172,18 @@ export default function InmueblesPage() {
         </div>
       </header>
 
+      {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* Filtros */}
+          {/* Panel de Filtros */}
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 h-fit space-y-6">
             <div className="flex items-center gap-2 border-b border-slate-900 pb-4">
               <Filter className="w-5 h-5 text-indigo-400" />
               <h2 className="font-bold text-lg">{INMUEBLES_TEXTS.filters.title}</h2>
             </div>
 
+            {/* Dirección */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.searchLabel}</label>
               <div className="relative">
@@ -173,16 +191,14 @@ export default function InmueblesPage() {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    handleFilterChange();
-                  }}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder={INMUEBLES_TEXTS.filters.searchPlaceholder}
                   className="w-full bg-slate-950/60 border border-slate-850 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 />
               </div>
             </div>
 
+            {/* Tipo de Inmueble */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.type}</label>
               <select
@@ -202,6 +218,7 @@ export default function InmueblesPage() {
               </select>
             </div>
 
+            {/* Estado */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.status}</label>
               <select
@@ -219,7 +236,7 @@ export default function InmueblesPage() {
               </select>
             </div>
 
-            {/* Filtro de rango de dinero */}
+            {/* Rango de precios */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-500 block">{INMUEBLES_TEXTS.filters.minPrice}</label>
@@ -282,7 +299,7 @@ export default function InmueblesPage() {
               </select>
             </div>
 
-            {/* Filtro de true o false para solo mis inmuebles */}
+            {/* Solo mis inmuebles */}
             <div className="flex items-center gap-3 pt-2">
               <input
                 type="checkbox"
@@ -300,7 +317,7 @@ export default function InmueblesPage() {
             </div>
           </div>
 
-          {/* Lista */}
+          {/* Listado */}
           <div className="lg:col-span-3 space-y-8">
             {isLoading ? (
               <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
@@ -319,112 +336,23 @@ export default function InmueblesPage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {properties.map((property) => {
-                    const isOwner = user?.id === property.vendedorId;
-
-                    let statusColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
-                    if (property.estado === EstadosInmuebleEnum.RESERVADO) {
-                      statusColor = 'bg-amber-500/10 text-amber-400 border-amber-500/25';
-                    } else if (property.estado === EstadosInmuebleEnum.VENDIDO) {
-                      statusColor = 'bg-slate-700/20 text-slate-400 border-slate-700/20';
-                    }
-
-                    return (
-                      <div
-                        key={property.id}
-                        className={`bg-slate-900/30 border ${
-                          isOwner ? 'border-slate-800' : 'border-slate-900'
-                        } rounded-2xl p-6 flex flex-col justify-between hover:shadow-xl transition-all relative overflow-hidden`}
-                      >
-                        {isOwner && (
-                          <div className="absolute top-0 right-0 bg-indigo-500/10 text-indigo-400 border-l border-b border-indigo-500/20 text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-bl-xl">
-                            {INMUEBLES_TEXTS.list.ownBadge}
-                          </div>
-                        )}
-
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-start">
-                            <span className="text-[10px] uppercase font-black tracking-wider text-indigo-400 bg-indigo-500/5 px-2.5 py-1 rounded-md border border-indigo-500/10">
-                              {property.tipoInmueble.nombre}
-                            </span>
-                            <span className={`text-xs border font-semibold px-2.5 py-1 rounded-md ${statusColor}`}>
-                              {property.estado === EstadosInmuebleEnum.DISPONIBLE && INMUEBLES_TEXTS.status.disponible}
-                              {property.estado === EstadosInmuebleEnum.RESERVADO && INMUEBLES_TEXTS.status.reservado}
-                              {property.estado === EstadosInmuebleEnum.VENDIDO && INMUEBLES_TEXTS.status.vendido}
-                            </span>
-                          </div>
-
-                          <h3 className="font-bold text-lg text-slate-100 line-clamp-1">
-                            {property.direccion}
-                          </h3>
-
-                          <div className="text-2xl font-black text-white">
-                            {formatPrice(property.precio)}
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-slate-400">
-                            <span>{property.habitaciones} {INMUEBLES_TEXTS.list.rooms}</span>
-                            <span>•</span>
-                            <span>{property.metrosCuadrados} {INMUEBLES_TEXTS.list.area}</span>
-                          </div>
-
-                          <div className="border-t border-slate-900/60 pt-4 flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-500">{INMUEBLES_TEXTS.list.agentTitle}</span>
-                            <span className="text-sm font-medium text-slate-300">{property.vendedor.nombre}</span>
-                            <span className="text-xs text-slate-500">{property.vendedor.email}</span>
-                          </div>
-                        </div>
-
-                        {isOwner && (
-                          <div className="border-t border-slate-900/60 mt-6 pt-4 flex flex-wrap gap-2 justify-end">
-                            {property.estado === EstadosInmuebleEnum.DISPONIBLE && (
-                              <button
-                                disabled={isUpdating === property.id}
-                                onClick={() => handleStatusChange(property.id, EstadosInmuebleEnum.RESERVADO)}
-                                className="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                                <span>{INMUEBLES_TEXTS.actions.reserve}</span>
-                              </button>
-                            )}
-
-                            {property.estado === EstadosInmuebleEnum.RESERVADO && (
-                              <>
-                                <button
-                                  disabled={isUpdating === property.id}
-                                  onClick={() => handleStatusChange(property.id, EstadosInmuebleEnum.DISPONIBLE)}
-                                  className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                                >
-                                  <RefreshCw className="w-3.5 h-3.5" />
-                                  <span>{INMUEBLES_TEXTS.actions.release}</span>
-                                </button>
-                                <button
-                                  disabled={isUpdating === property.id}
-                                  onClick={() => handleStatusChange(property.id, EstadosInmuebleEnum.VENDIDO)}
-                                  className="bg-slate-700 hover:bg-slate-650 active:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                  <span>{INMUEBLES_TEXTS.actions.sell}</span>
-                                </button>
-                              </>
-                            )}
-
-                            {/* Si no se ha vendido, se habilita eliminar */}
-                            {property.estado !== EstadosInmuebleEnum.VENDIDO && (
-                              <button
-                                disabled={isUpdating === property.id}
-                                onClick={() => handleDelete(property.id)}
-                                className="bg-red-950/20 hover:bg-red-950/45 text-red-400 border border-red-900/30 hover:border-red-900/60 p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50"
-                                title={INMUEBLES_TEXTS.actions.deleteTooltip}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {properties.map((property) => (
+                    <InmuebleCard
+                      key={property.id}
+                      property={property}
+                      onDetailClick={(prop) => {
+                        setSelectedProperty(prop);
+                        setIsDetailModalOpen(true);
+                      }}
+                      onEditClick={(prop) => {
+                        setSelectedProperty(prop);
+                        setIsEditModalOpen(true);
+                      }}
+                      onStatusChange={handleStatusChange}
+                      onDelete={handleDelete}
+                      isUpdating={isUpdating === property.id}
+                    />
+                  ))}
                 </div>
 
                 {/* Paginación */}
@@ -457,11 +385,40 @@ export default function InmueblesPage() {
         </div>
       </main>
 
+      {/* Modales */}
       <AddInmuebleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={fetchProperties}
         propertyTypes={propertyTypes}
+      />
+
+      <InmuebleDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedProperty(null);
+        }}
+        property={selectedProperty}
+        onEditClick={(prop) => {
+          setIsDetailModalOpen(false);
+          setSelectedProperty(prop);
+          setIsEditModalOpen(true);
+        }}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+        isUpdating={!!isUpdating}
+      />
+
+      <EditInmuebleModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProperty(null);
+        }}
+        onSuccess={fetchProperties}
+        propertyTypes={propertyTypes}
+        property={selectedProperty}
       />
     </div>
   );
