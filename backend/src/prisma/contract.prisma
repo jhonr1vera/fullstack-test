@@ -1,0 +1,39 @@
+// use prisma-next
+
+model User {
+  id        String   @id @default(uuid())
+  nombre    String
+  email     String   @unique
+  password  String
+  activo    Boolean  @default(true)
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+  deletedAt TimestamptzString?
+
+  inmuebles Inmueble[]
+}
+
+model TipoInmueble {
+  id        String   @id @default(uuid())
+  codigo    String   @unique
+  nombre    String
+  activo    Boolean  @default(true)
+  
+  inmuebles Inmueble[]
+}
+
+model Inmueble {
+  id              String       @id @default(uuid())
+  direccion       String
+  precio          Decimal
+  habitaciones    Int
+  metrosCuadrados Int
+  tipoInmueble    TipoInmueble @relation(fields: [tipoInmuebleId], references: [id])
+  tipoInmuebleId  String
+  vendedor        User         @relation(fields: [vendedorId], references: [id])
+  vendedorId      String
+  estado          String       @default("DISPONIBLE")
+  createdAt       TimestamptzString @default(now())
+  updatedAt       temporal.updatedAtString()
+  deletedAt       TimestamptzString?
+}
