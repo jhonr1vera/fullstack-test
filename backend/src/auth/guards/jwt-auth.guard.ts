@@ -10,10 +10,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext) {
+    const handler = context.getHandler();
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
+      handler,
       context.getClass(),
     ]);
+    console.log(`JwtAuthGuard: Checking route ${handler.name}. isPublic = ${isPublic}`);
     if (isPublic) {
       return true;
     }
