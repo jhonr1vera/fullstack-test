@@ -90,12 +90,14 @@ export default function InmuebleItem({
 
       {isOwner && (
         <div className="border-t border-slate-900/60 mt-6 pt-4 flex flex-wrap gap-2 justify-end">
-          <button
-            onClick={() => onEditClick(property)}
-            className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer"
-          >
-            {INMUEBLES_TEXTS.editModal.title}
-          </button>
+          {property.estado !== EstadosInmuebleEnum.VENDIDO && (
+            <button
+              onClick={() => onEditClick(property)}
+              className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer"
+            >
+              {INMUEBLES_TEXTS.editModal.title}
+            </button>
+          )}
 
           {property.estado === EstadosInmuebleEnum.DISPONIBLE && (
             <button

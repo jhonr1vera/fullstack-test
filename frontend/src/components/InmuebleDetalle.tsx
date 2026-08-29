@@ -135,7 +135,7 @@ export default function InmuebleDetalle({
 
         <div className="flex flex-wrap gap-3 justify-between items-center pt-4 border-t border-slate-850">
           <div>
-            {isOwner && (
+            {isOwner && property.estado !== EstadosInmuebleEnum.VENDIDO && (
               <button
                 onClick={() => onEditClick(property)}
                 className="bg-indigo-650/10 hover:bg-indigo-650/20 text-indigo-400 border border-indigo-900/30 hover:border-indigo-900/60 px-4.5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer"
