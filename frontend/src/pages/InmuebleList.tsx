@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { LogOut, Search, Filter, Home, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { api } from '../services/api.js';
@@ -9,6 +10,7 @@ import AddInmueble from '../components/AddInmueble.js';
 import EditInmueble from '../components/EditInmueble.js';
 import InmuebleDetalle from '../components/InmuebleDetalle.js';
 import InmuebleItem from '../components/InmuebleItem.js';
+import PageSizeSelector from '../components/PageSizeSelector.js';
 
 export default function InmuebleList() {
   const { user, logout } = useAuth();
@@ -32,6 +34,7 @@ export default function InmuebleList() {
   const [maxPrice, setMaxPrice] = useState<number | ''>('');
   const [onlyMine, setOnlyMine] = useState(false);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(6);
   const [orderBy, setOrderBy] = useState<'precio' | 'createdAt'>('createdAt');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
 
@@ -70,7 +73,7 @@ export default function InmuebleList() {
 
     const queryParams: Record<string, string | number | boolean> = {
       page,
-      limit: 6,
+      limit,
     };
 
     if (debouncedSearch.trim()) queryParams.search = debouncedSearch.trim();
@@ -101,7 +104,7 @@ export default function InmuebleList() {
   // Disparar carga de propiedades
   useEffect(() => {
     fetchProperties();
-  }, [page, debouncedSearch, tipoInmuebleId, status, minPrice, maxPrice, onlyMine, orderBy, order]);
+  }, [page, debouncedSearch, tipoInmuebleId, status, minPrice, maxPrice, onlyMine, orderBy, order, limit]);
 
   const handleFilterChange = () => {
     setPage(1);
@@ -145,11 +148,19 @@ export default function InmuebleList() {
       {/* Encabezado */}
       <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Home className="w-8 h-8 text-indigo-500" />
-            <h1 className="text-2xl font-black tracking-tight text-white">
-              {INMUEBLES_TEXTS.header.title}
-            </h1>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Home className="w-8 h-8 text-indigo-500" />
+              <h1 className="text-2xl font-black tracking-tight text-white">
+                {INMUEBLES_TEXTS.header.title}
+              </h1>
+            </div>
+            <nav className="flex items-center gap-4 border-l border-slate-850 pl-6 text-sm font-semibold">
+              <span className="text-indigo-400 cursor-default">{INMUEBLES_TEXTS.header.navInmuebles}</span>
+              <Link to="/usuarios" className="text-slate-400 hover:text-white transition-colors">
+                {INMUEBLES_TEXTS.header.navAgents}
+              </Link>
+            </nav>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-slate-400 text-sm hidden sm:inline">
@@ -356,27 +367,38 @@ export default function InmuebleList() {
                 </div>
 
                 {/* Paginación */}
-                {meta && meta.totalPages > 1 && (
+                {meta && (
                   <div className="flex justify-between items-center bg-slate-900/20 border border-slate-900/60 rounded-xl px-6 py-4 mt-8">
-                    <span className="text-sm text-slate-400">
-                      {INMUEBLES_TEXTS.pagination.pageLabel} <strong className="text-slate-200">{meta.page}</strong> {INMUEBLES_TEXTS.pagination.ofLabel} <strong className="text-slate-200">{meta.totalPages}</strong>
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={meta.page === 1}
-                        className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-350 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
-                        disabled={meta.page === meta.totalPages}
-                        className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-355 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    </div>
+                    <PageSizeSelector
+                      pageSize={limit}
+                      onChange={(size) => {
+                        setLimit(size);
+                        setPage(1);
+                      }}
+                    />
+                    {meta.totalPages > 1 && (
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-slate-400">
+                          {INMUEBLES_TEXTS.pagination.pageLabel} <strong className="text-slate-200">{meta.page}</strong> {INMUEBLES_TEXTS.pagination.ofLabel} <strong className="text-slate-200">{meta.totalPages}</strong>
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={meta.page === 1}
+                            className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-355 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
+                            disabled={meta.page === meta.totalPages}
+                            className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-355 disabled:opacity-30 disabled:pointer-events-none p-2 rounded-xl transition-all cursor-pointer"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </>
