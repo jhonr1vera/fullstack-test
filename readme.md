@@ -8,10 +8,10 @@ Aplicación fullstack para la administración de agentes inmobiliarios y control
 
 La base de datos contiene pre-cargados 3 agentes inmobiliarios y 15 propiedades distribuidas en diversos estados (`DISPONIBLE`, `RESERVADO`, `VENDIDO`). Todos los agentes comparten la misma contraseña:
 
-* **Contraseña común:** `abC.12345`
-* **Agente 1:** `vendedor1@example.com` (Juan Pérez)
-* **Agente 2:** `vendedor2@example.com` (María Gómez)
-* **Agente 3:** `vendedor3@example.com` (Carlos Rodríguez)
+- **Contraseña común:** `abC.12345`
+- **Agente 1:** `vendedor1@example.com` (Juan Pérez)
+- **Agente 2:** `vendedor2@example.com` (María Gómez)
+- **Agente 3:** `vendedor3@example.com` (Carlos Rodríguez)
 
 ---
 
@@ -20,10 +20,12 @@ La base de datos contiene pre-cargados 3 agentes inmobiliarios y 15 propiedades 
 El servidor de la API REST corre por defecto en el puerto **`3000`**.
 
 ### Requisitos Previos
-* Node.js (versión 18 o superior recomendada)
-* PostgreSQL ejecutándose localmente o en la nube
+
+- Node.js (versión 18 o superior recomendada)
+- PostgreSQL ejecutándose localmente o en la nube
 
 ### Configuración del Entorno
+
 1. Entra a la carpeta del backend:
    ```bash
    cd backend
@@ -33,12 +35,13 @@ El servidor de la API REST corre por defecto en el puerto **`3000`**.
    cp .env.example .env
    ```
 3. Configura las siguientes variables en el archivo `.env`:
-   * `DATABASE_URL`: URL de conexión a tu base de datos PostgreSQL.
-     * *Ejemplo local:* `postgresql://postgres:contraseña@localhost:5432/gestion_inmuebles?schema=public`
-   * `JWT_SECRET`: Secreto criptográfico para la firma de tokens JWT (puedes generar una cadena aleatoria).
-   * `NODE_ENV`: Establecer a `development` o `production`.
+   - `DATABASE_URL`: URL de conexión a tu base de datos PostgreSQL.
+     - _Ejemplo local:_ `postgresql://postgres:contraseña@localhost:5432/gestion_inmuebles?schema=public`
+   - `JWT_SECRET`: Secreto criptográfico para la firma de tokens JWT (puedes generar una cadena aleatoria).
+   - `NODE_ENV`: Establecer a `development` o `production`.
 
 ### Instalación y Ejecución
+
 1. Instala las dependencias del proyecto:
    ```bash
    npm install
@@ -49,7 +52,7 @@ El servidor de la API REST corre por defecto en el puerto **`3000`**.
    ```
 3. Ejecuta el Seed para poblar la base de datos con tipos de inmuebles, usuarios y propiedades:
    ```bash
-   npm run prisma:seed
+   npx prisma db seed
    ```
 4. Levanta el servidor en modo desarrollo:
    ```bash
@@ -63,6 +66,7 @@ El servidor de la API REST corre por defecto en el puerto **`3000`**.
 El cliente de desarrollo corre por defecto en el puerto **`5173`**.
 
 ### Configuración del Entorno
+
 1. Entra a la carpeta del frontend:
    ```bash
    cd ../frontend
@@ -72,9 +76,10 @@ El cliente de desarrollo corre por defecto en el puerto **`5173`**.
    cp .env.example .env
    ```
 3. Configura la URL del backend en la variable de entorno:
-   * `VITE_API_URL`: Dirección de la API del servidor (por defecto `http://localhost:3000`).
+   - `VITE_API_URL`: Dirección de la API del servidor (por defecto `http://localhost:3000`).
 
 ### Instalación y Ejecución
+
 1. Instala las dependencias del proyecto:
    ```bash
    npm install
